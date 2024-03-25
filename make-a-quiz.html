@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create a quiz</title>
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="general.css">
+  <link rel="stylesheet" href="cards.css">
+  <style>
+    .orange-box {
+      width: 50%;
+      float: left;
+      padding: 20px;
+      border: 2px solid orange;
+      margin-right: 5%;
+    }
+
+    .yellow-box {
+      width: 40%;
+      float: right;
+      padding: 20px;
+      border: 2px solid yellow;
+    }
+  </style>
+</head>
+<body>
+  <ul class="topnav">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="add-question.html">Add questions</a></li>
+    <li><a class="active" href="make-a-quiz.html">Create a quiz</a></li>
+    <li><a href="take-a-quiz.html">Take a quiz</a></li>
+    <li class="right"><a href="#about">About</a></li>
+  </ul>
+
+  <div class="orange-box">
+    <h2>Questions Bank</h2>
+    <p>Click on a Question to add it to the quiz:</p>
+    <div class="questions cards" id="questionBank"></div>
+  </div>
+
+  <div class="yellow-box">
+    <h2>The New Quiz (0 questions)</h2>
+    <p>Quiz title:</p>
+    <input type="text" id="quizTitle" name="quizTitle" required><br>
+    <button type="button" onclick="saveChanges()">Save your changes</button>
+    <button type="button" onclick="startNewQuiz()">Save this quiz and start a new one</button>
+    <p>If you want to remove a question from the quiz, you can click on the question here and it will be removed from the quiz.</p>
+    <div class="quiz cards" id="quizContainer"></div>
+  </div>
+
+  <script>
+      let host = "http://localhost:8080";
+    let questions = [];
+
+    window.onload = async function() {
+        questions = await getAllQuestions();
+        displayQuestions(questions, "questionBank");
+    }
+
+    async function getAllQuestions() {
+        let response = await fetch(host + "/questions");
+        return await response.json();
+    }
+
+    function displayQuestions(questions, containerId) {
+        let container = document.getElementById(containerId);
+        container.innerHTML = "";
+
+        for (let question of questions) {
+            let card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <img src="${host}/questions/${question.id}/image" alt="Question Image">
+                <div class="container">
+                    <h4><b>${question.id}</b></h4> 
+                    <p>${question.description}</p>
+                    <form>
+                        <input type="radio" id="q${question.id}ptionA" name="q2Answer" value="A">
+                        <label for="q${question.id}ptionA">${question.choices[0]}</label><br>
+
+                        <input type="radio" id="q${question.id}ptionB" name="q2Answer" value="B">
+                        <label for="q${question.id}ptionB">${question.choices[1]}</label><br>
+
+                        <input type="radio" id="q${question.id}ptionC" name="q2Answer" value="C">
+                        <label for="q${question.id}ptionC">${question.choices[2]}</label><br>       
+                    </form> 
+                </div>`;
+            card.addEventListener("click", function() {
+                addQuestionToQuiz(card);
+            });
+            container.appendChild(card);
+        }
+    }
+
+    function addQuestionToQuiz(card) {
+        let quizContainer = document.getElementById("quizContainer");
+        quizContainer.appendChild(card);
+        updateQuizHeader();
+    }
+
+    function removeQuestionFromQuiz(card) {
+        let quizContainer = document.getElementById("quizContainer");
+        quizContainer.removeChild(card);
+        updateQuizHeader();
+    }
+
+    function updateQuizHeader() {
+        let quizContainer = document.getElementById("quizContainer");
+        let numQuestions = quizContainer.getElementsByClassName("card").length;
+        document.getElementById("quizHeader").innerText = `The New Quiz (${numQuestions} questions)`;
+    }
+
+    function saveChanges() {
+        alert("Changes saved!");
+    }
+
+    function startNewQuiz() {
+        alert("Quiz saved and new quiz started!");
+    }
+  </script>
+</body>
+</html>
