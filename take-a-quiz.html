@@ -6,6 +6,50 @@
   <title>Document</title>
 </head>
 <body>
-  
+  <ul class="topnav">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="add-question.html">Add Questions</a></li>
+    <li><a href="make-a-quiz.html">Create a Quiz</a></li>
+    <li><a class="active" href="take-a-quiz.html">Take a Quiz</a></li>
+    <li class="right"><a href="#about">About</a></li>
+</ul>
+
+<div id="quizList" class="cards"></div>
+
+<script>
+    let host = "http://localhost:8080";
+
+    async function loadQuizzes() {
+        let response = await fetch(host + "/quizzes");
+        let quizzes = await response.json();
+        displayQuizzes(quizzes);
+    }
+
+    function displayQuizzes(quizzes) {
+        let list = document.getElementById("quizList");
+        list.innerHTML = "";
+
+        quizzes.forEach(quiz => {
+            let div = document.createElement("div");
+            div.className = "card";
+            div.innerHTML = `
+                <div class="container">
+                    <h4><b>${quiz.title}</b></h4>
+                    <button onclick="takeQuiz(${quiz.id})">Take Quiz</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    async function takeQuiz(quizId) {
+        let response = await fetch(host + `/quizzes/${quizId}`);
+        let quiz = await response.json();
+        sessionStorage.setItem("currentQuiz", JSON.stringify(quiz));
+        window.location.href = "quiz.html";
+    }
+
+    loadQuizzes();
+</script>
 </body>
 </html>
